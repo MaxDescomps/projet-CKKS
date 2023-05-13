@@ -1,0 +1,1 @@
+server_input = [None] # Input from the server keyboard to give orders. A list so we can point to its content from other modules
