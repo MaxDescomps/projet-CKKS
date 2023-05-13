@@ -32,9 +32,9 @@ class Server():
         try:
             self.socket.bind((self.host, self.port))
         except socket.error as e:
-            print(str(e))
-
-        self.run()
+            print("Socket.bind: ", str(e))
+        else:
+            self.run()
 
     def run(self):
         """Handle the server once initialized"""
@@ -52,6 +52,7 @@ class Server():
         while server_input[0] != "exit":
             time.sleep(1) # CPU break
 
+        #todo: close every connections before closing socket
         self.close()
 
     def close(self):
@@ -97,13 +98,15 @@ class Server():
             if(self.HashTable[name] == password):
                 connection.send(str.encode('Connection Successful')) # Response Code for Connected Client 
                 print('Connected : ',name)
+                
+                # Main loop of communication with a client
+                while True:
+                    break
+
             else:
                 connection.send(str.encode('Login Failed')) # Response code for login failed
                 print('Connection denied : ',name)
 
-        # Main loop of communication with a client
-        while True:
-            break
         
         # End of communication with a client
         self.thread_count -= 1
