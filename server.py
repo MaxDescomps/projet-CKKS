@@ -18,7 +18,8 @@ class Server():
         self.host = '127.0.0.1'
         self.port = 9999
         self.thread_count = 0
-        self.hash_file = './HashTable.json'
+        self.hash_file = './HashTable.json' # Dictionnary holding login informations
+        self.data_file = './DataTable.json' # Dictionnary holding server data
         self.kthread = KeyboardThread()
 
         # Load the HashTable
@@ -27,6 +28,13 @@ class Server():
                 self.HashTable = json.load(f)
         except:
             self.HashTable = {} # Create the HashTable if needed
+
+        # Load the DataTable
+        try:
+            with open(self.data_file, 'r') as f:
+                self.DataTable = json.load(f)
+        except:
+            self.DataTable = {} # Create the HashTable if needed
 
         # Bind the socket
         try:
@@ -58,11 +66,15 @@ class Server():
     def close(self):
         """Close the server properly"""
 
-        # Save the HashTable before turning off the server
+        # Save informations before turning off the server
         with open(self.hash_file, 'w') as f:
             json.dump(self.HashTable, f)
+        
+        with open(self.data_file, 'w') as f:
+            json.dump(self.DataTable, f)
 
-        self.socket.close()
+        self.socket.shutdown(socket.SHUT_RDWR) # Closes connections to the socket
+        self.socket.close() # Closes the socket
 
     def threaded_client(self, connection: socket.socket):
         """
@@ -100,8 +112,20 @@ class Server():
                 print('Connected : ',name)
                 
                 # Main loop of communication with a client
-                while True:
-                    break
+                msg = True
+
+                while msg:
+                    msg = connection.recv(2048)
+                    if msg:
+                        msg = msg.decode()
+                        print(f"{name}: {msg}")
+
+                        if name not in self.DataTable:
+                            self.DataTable[name] = []
+                        
+                        self.DataTable[name].append(msg)
+
+                        print(self.DataTable)
 
             else:
                 connection.send(str.encode('Login Failed')) # Response code for login failed

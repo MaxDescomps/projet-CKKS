@@ -34,11 +34,17 @@ class Client():
 
         print(response)
 
-        self.use_server()
+        if response[0] != 'R': # If client did not Register for the first time it can use the server
+            self.use_server()
+
+        self.socket.close()
 
     def use_server(self):
         """Handle client once connected to the server"""
+        msg = True
 
-        self.socket.close()
+        while msg:
+            msg = input()
+            self.socket.send(str.encode(msg))
 
 Client()
