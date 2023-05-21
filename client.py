@@ -116,7 +116,7 @@ class Client():
                         else:
                             print(f"{style.RED}Path not found{style.END}")
                     elif msg[0:6] == '/send ':
-                        info = (msg[6:]).split(" ", 0)
+                        info = (msg[6:]).split(" ")
                         if len(info) == 2:
                             if os.path.exists(info[0]) and os.path.isfile(info[0]):
                                 file = open(info[0], "r")
@@ -126,7 +126,12 @@ class Client():
                             else:
                                 print(f"{style.RED}File not found{style.END}")
                         else:
-                            print(f"{style.RED}Too many parameters{style.END}")
+                            print(f"{style.RED}Number of parameters incorrect{style.END}")
+                    elif msg[0:5] == '/srv ':
+                        self.socket.send(str.encode(msg))
+                        m = self.socket.recv(2048)
+                        m = m.decode()
+                        print(m)
                     else:
                         print(f"{style.RED}Command unknown or incomplete{style.END}")
                 else:
