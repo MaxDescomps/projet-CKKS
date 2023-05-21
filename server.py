@@ -8,51 +8,7 @@ import threading
 import time
 import datetime
 import os
-
-class style:
-    END = '\33[0m'
-    BOLD = '\33[1m'
-    ITALIC = '\33[3m'
-    URL = '\33[4m'
-    BLINK = '\33[5m'
-    BLINK2 = '\33[6m'
-    SELECTED = '\33[7m'
-
-    BLACK = '\33[30m'
-    RED = '\33[31m'
-    GREEN = '\33[32m'
-    YELLOW = '\33[33m'
-    BLUE = '\33[34m'
-    VIOLET = '\33[35m'
-    BEIGE = '\33[36m'
-    WHITE = '\33[37m'
-
-    BLACKBG = '\33[40m'
-    REDBG = '\33[41m'
-    GREENBG = '\33[42m'
-    YELLOWBG = '\33[43m'
-    BLUEBG = '\33[44m'
-    VIOLETBG = '\33[45m'
-    BEIGEBG = '\33[46m'
-    WHITEBG = '\33[47m'
-
-    GREY = '\33[90m'
-    RED2 = '\33[91m'
-    GREEN2 = '\33[92m'
-    YELLOW2 = '\33[93m'
-    BLUE2 = '\33[94m'
-    VIOLET2 = '\33[95m'
-    BEIGE2 = '\33[96m'
-    WHITE2 = '\33[97m'
-
-    GREYBG = '\33[100m'
-    REDBG2 = '\33[101m'
-    GREENBG2 = '\33[102m'
-    YELLOWBG2 = '\33[103m'
-    BLUEBG2 = '\33[104m'
-    VIOLETBG2 = '\33[105m'
-    BEIGEBG2 = '\33[106m'
-    WHITEBG2 = '\33[107m'
+from utilities import *
 
 class Server():
     """Cloud server class"""
@@ -168,6 +124,7 @@ class Server():
 
                         if msg[0:6] == '/send ':
                             info = (msg[6:]).split("\n", 1)
+
                             file = open(os.path.join("database", info[0]),"w")
                             file.write(info[1])
                             file.close()
@@ -228,26 +185,23 @@ class Server():
                                         data1 = file.read()
                                         file.close()
 
-                                        data0 = data0.split("\n")
-                                        for (i,line) in enumerate(data0):
-                                            data0[i] = line.split(",")
-                                        data1 = data1.split("\n")
-                                        for (i,line) in enumerate(data1):
-                                            data1[i] = line.split(",")
+                                        # Split the string by commas and remove parentheses
+                                        data0 = data0.split(",")
+                                        data1 = data1.split(",")
+                                        data0 = [number.strip('()') for number in data0]
+                                        data1 = [number.strip('()') for number in data1]
 
-                                        file = open("results.csv", "w")
-                                        for i in range(min(len(data0), len(data1))):
-                                            for j in range(min(len(data0[i]), len(data1[i]))):
-                                                try:
-                                                    val = int(data0[i][j]) + int(data1[i][j])
-                                                except:
-                                                    val = 0
-                                                file.write(f"{val}")
-                                                if j < min(len(data0[i]), len(data1)) - 1:
-                                                    file.write(f",")
-                                            if i < min(len(data0), len(data1)) - 1:
-                                                file.write(f"\n")
+                                        # Convert the strings to complex numbers
+                                        data0 = [complex(number) for number in data0]
+                                        data1 = [complex(number) for number in data1]
 
+                                        data0 = np.array(data0)
+                                        data1 = np.array(data1)
+
+                                        file = open("AddResults.txt", "w")
+                                        data = data0 + data1
+                                        data = ','.join(map(str, np.asarray(data).tolist()))
+                                        file.write(data)
                                         file.close()
                                         connection.send(str.encode(f"Done"))
                                     else:
@@ -265,26 +219,24 @@ class Server():
                                         data1 = file.read()
                                         file.close()
 
-                                        data0 = data0.split("\n")
-                                        for (i,line) in enumerate(data0):
-                                            data0[i] = line.split(",")
-                                        data1 = data1.split("\n")
-                                        for (i,line) in enumerate(data1):
-                                            data1[i] = line.split(",")
+                                        # Split the string by commas and remove parentheses
+                                        data0 = data0.split(",")
+                                        data1 = data1.split(",")
+                                        data0 = [number.strip('()') for number in data0]
+                                        data1 = [number.strip('()') for number in data1]
 
-                                        file = open("results.csv", "w")
-                                        for i in range(min(len(data0), len(data1))):
-                                            for j in range(min(len(data0[i]), len(data1[i]))):
-                                                try:
-                                                    val = int(data0[i][j]) * int(data1[i][j])
-                                                except:
-                                                    val = 0
-                                                file.write(f"{val}")
-                                                if j < min(len(data0[i]), len(data1)) - 1:
-                                                    file.write(f",")
-                                            if i < min(len(data0), len(data1)) - 1:
-                                                file.write(f"\n")
+                                        # Convert the strings to complex numbers
+                                        data0 = [complex(number) for number in data0]
+                                        data1 = [complex(number) for number in data1]
 
+                                        data0 = np.array(data0)
+                                        data1 = np.array(data1)
+
+                                        file = open("MulResults.txt", "w")
+                                        poly_modulo = Polynomial([1, 0, 0, 0, 1])
+                                        data = data0 * data1 % poly_modulo
+                                        data = ','.join(map(str, np.asarray(data).tolist()))
+                                        file.write(data)
                                         file.close()
                                         connection.send(str.encode(f"Done"))
                                     else:
