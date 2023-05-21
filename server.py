@@ -6,6 +6,8 @@ import hashlib
 import json
 import threading
 import time
+import datetime
+import os
 
 class Server():
     """Cloud server class"""
@@ -118,14 +120,36 @@ class Server():
                     msg = connection.recv(2048)
                     if msg:
                         msg = msg.decode()
-                        print(f"{name}: {msg}")
 
-                        if name not in self.DataTable:
-                            self.DataTable[name] = []
-                        
-                        self.DataTable[name].append(msg)
+                        if msg[0:6] == '/send ':
+                            info = (msg[6:]).split("\n", 1)
+                            file = open(os.path.join("database", info[0]),"w")
+                            file.write(info[1])
+                            file.close()
 
-                        print(self.DataTable)
+                            print(f"{name}: /send {info[0]}")
+
+                            if name not in self.DataTable:
+                                self.DataTable[name] = []
+
+                            self.DataTable[name].append(f"/send {info[0]}")
+
+                            file = open("logs.txt", "a")
+                            file.write(f"({datetime.datetime.now()}) {name}: /send {info[0]}\n")
+                            file.close()
+                        else:
+                            print(f"{name}: {msg}")
+
+                            if name not in self.DataTable:
+                                self.DataTable[name] = []
+
+                            self.DataTable[name].append(msg)
+
+                            file = open("logs.txt", "a")
+                            file.write(f"({datetime.datetime.now()}) {name}: {msg}\n")
+                            file.close()
+
+                        #print(self.DataTable)
 
             else:
                 connection.send(str.encode('Login Failed')) # Response code for login failed
